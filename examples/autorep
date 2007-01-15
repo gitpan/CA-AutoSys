@@ -1,0 +1,158 @@
+#!/bin/env perl
+
+#
+# $Id: autorep 8 2007-01-15 08:29:49Z sini $
+#
+# CA::AutoSys - Perl Interface to CA's AutoSys job control.
+# Copyright (c) 2006 Susnjar Software Engineering <sini@susnjar.de>
+# See LICENSE for terms of distribution.
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+
+=head1 NAME
+
+autorep - A rather naive and incomplete remake of the "autorep" tool.
+
+=head1 SYNOPSIS
+
+autorep [options]
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-J jobname | --job jobname>
+
+Specify the job name to be queried. Wildcards can be specified with %, e.g:
+autorep -J MY_JOBS% would return a status report for all jobs beginning with
+the string MY_JOBS.
+
+=item B<-w [width] | --width [width]>
+
+Specify the display width to use. If no width is given, we will use a default
+width of 120 characters.
+COMPATIBILITY NOTE: specifying a width is not possible with CA's original autorep tool.
+
+=item B<-S server | --server server>
+
+Specify the AutoSys' database server to connect to.
+COMPATIBILITY NOTE: this option does not exist in CA's original autorep tool.
+
+=item B<-U user | --user user>
+
+Specify the database user. With an out-of-the-box AutoSys installation, the default user should work.
+COMPATIBILITY NOTE: this option does not exist in CA's original autorep tool.
+
+=item B<-P password | --password password>
+
+Specify the database password. With an out-of-the-box AutoSys installation, the default password should work.
+COMPATIBILITY NOTE: this option does not exist in CA's original autorep tool.
+
+=item B<--help>
+
+Print a brief help message and exits.
+
+=item B<--man>
+
+Prints the manual page and exits.
+
+=back
+
+=head1 DESCRIPTION
+
+This program will print a status report a la CA's original autorep tool.
+
+Quick overview of two-letter status codes in alphabetical order:
+
+    AC - activated            FA - failure              IN - inactive
+    OH - on hold              OI - on ice               QW - queue wait
+    RD - refresh dependencies RE - restart              RF - refresh filewatcher
+    RU - running              ST - starting             SU - success
+    TE - terminated
+
+=head1 TODO
+
+The following options are not yet implemented:
+    -d, -s, -q, -o [OverRide #], -R run_num, -L Print Level, -x,
+    -G GlobalName, -M MachineName, -D DataServer:DataBase
+
+=head1 AUTHOR
+
+Sinisa Susnjar <sinisa.susnjar@freenet.de>
+
+=cut
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+use CA::AutoSys;
+use Pod::Usage;
+
+my $jobname;
+my $width = 80;
+my $rest = 80 - 28; # standard width - remainder of line after job name = 52
+my ($server, $user, $password) = qw(AUTOSYS_DEV autosys autosys);
+
+GetOptions(	"job|J=s"		=> \$jobname,
+			"server|S=s"	=> \$server,
+			"user|U=s"		=> \$user,
+			"password|P=s"	=> \$password,
+			"width|w:120"	=> \$width,
+			"help|?"		=> sub { pod2usage(1); exit(0); },
+			"man"			=> sub { pod2usage(-verbose => 2); exit(0); } ) or pod2usage(1);
+
+my $hdl = CA::AutoSys->new(server => $server, user => $user, password => $password);
+
+my $jobs = $hdl->find_jobs($jobname);
+
+# prints a job's status
+sub print_job_status {
+	my $job = shift();
+	my $level = shift();
+	my $status = $job->get_status();
+	printf("%*s%-*s %-20s %-20s %2s %d/%d", $level*2, "", $width-$rest-$level*2, $job->{job_name},
+			CA::AutoSys::Status::format_time($status->{last_start}),
+			CA::AutoSys::Status::format_time($status->{last_end}),
+			CA::AutoSys::Status::format_status($status->{status}),
+			$status->{run_num} ? $status->{run_num} : 0,
+			$status->{ntry} ? $status->{ntry} : 0);
+	if (defined($status->{exit_code}) && int($status->{exit_code}) > 0) {
+		printf(" %d", int($status->{exit_code}));
+	}
+	printf("\n");
+
+	# find this job's children
+	my $children = $job->find_children();
+
+	# loop through all children...
+	while (my $child = $children->next_child()) {
+		# print child's status
+		print_job_status($child, $level+1);
+	}
+
+	if ($job->has_children() && $job->{job_type} eq "b") {
+		printf("\n");
+	}
+}	# print_job_status()
+
+printf("%-*s     Last Start            Last End        ST  Run  Pri/Xit\n", $width-$rest, "Job Name");
+printf("%-*s ____________________ ____________________ __ _______ ___\n\n", $width-$rest, "_"x($width-$rest));
+
+# loop through all jobs...
+while (my $job = $jobs->next_job()) {
+	print_job_status($job, 0);
+}
