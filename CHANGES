@@ -25,6 +25,11 @@ Introduction
   This file documents the changes to each and every release of the
   AutoSys perl API, going back as far as the initial 0.99 release.
 
+Changes for 1.00 - release date 15-jan-2007
+
+  o Added online help (--help/--man) switches for examples.
+  o Added missing META.yml (sorry, it's my first CPAN module...) 
+
 Changes for 0.99 - release date 10-jan-2007
 
   o Initial development.

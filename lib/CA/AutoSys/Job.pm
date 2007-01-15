@@ -27,10 +27,6 @@ require CA::AutoSys::Status;
 use strict;
 use warnings;
 
-use vars qw($VERSION);
-
-$VERSION = '0.99';
-
 use Exporter;
 use vars qw(@ISA @EXPORT);
 @ISA = qw(Exporter);

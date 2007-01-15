@@ -1,0 +1,13 @@
+CHANGES
+COPYRIGHT
+examples/autorep
+examples/sendevent
+lib/CA/AutoSys.pm
+lib/CA/AutoSys/Job.pm
+lib/CA/AutoSys/Status.pm
+LICENSE
+Makefile.PL
+MANIFEST			This list of files
+META.yml
+README
+TODO

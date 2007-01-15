@@ -31,7 +31,7 @@ use DBI;
 
 use vars qw($VERSION);
 
-$VERSION = '0.99';
+$VERSION = '1.00';
 
 use Exporter;
 use vars qw(@ISA @EXPORT);
