@@ -1,8 +1,8 @@
 #
-# $Id: Status.pm 3 2007-01-04 00:21:24Z sini $
+# $Id: Status.pm 14 2007-01-16 10:02:19Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
-# Copyright (c) 2006 Susnjar Software Engineering <sini@susnjar.de>
+# Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
 # See LICENSE for terms of distribution.
 # 
 # This library is free software; you can redistribute it and/or
@@ -84,4 +84,117 @@ sub format_time {
 	# return sprintf("%02d/%02d/%04d  %02d:%02d:%02d (%d)", $mon, $mday, $year, $hour, $min, $sec, $time);
 }	# format_time()
 
+use constant {
+	NONE		=> 0,
+	RUNNING		=> 1,
+	UNDEF_2		=> 2,
+	STARTING	=> 3,
+	SUCCESS		=> 4,
+	FAILURE		=> 5,
+	TERMINATED	=> 6,
+	ON_ICE		=> 7,
+	INACTIVE	=> 8,
+	ACTIVATED	=> 9,
+	RESTART		=> 10,
+	ON_HOLD		=> 11,
+	QUEUE_WAIT	=> 12,
+	UNDEF_13	=> 13,
+	REFRESH_DEP	=> 14,
+	REFRESH_FW	=> 15
+};
+
 1;
+
+__END__
+
+=head1 NAME
+
+CA::AutoSys::Status - Object representing an AutoSys job status.
+
+=head1 CLASS METHODS
+
+=head2 B<format_status() >
+
+    my $status_string = $status->format_status($status->{status}) ;
+
+Returns a two character string that represents the status like the AutoSys 'autorep' tool.
+
+=head2 B<format_time() >
+
+    my $time_string = $status->format_time($status->{last_start}) ;
+
+Returns a time string that looks like the one from AutoSys' 'autorep' tool.
+
+=head1 INSTANCE VARIABLES
+
+=head2 B<last_start>
+
+    print "last_start: ".$status->{last_start}."\n";
+
+Contains the time when the job was last started or 999999999 (CA's equivalent for never).
+Time is measured in non leap seconds since the epoch, i.e. like the return value of perl's time() function.
+
+=head2 B<last_end>
+
+    print "last_end: ".$status->{last_end}."\n";
+
+Contains the time when the job last ended or 999999999 (CA's equivalent for never).
+Time is measured in non leap seconds since the epoch, i.e. like the return value of perl's time() function.
+
+=head2 B<status>
+
+    print "status: ".$status->{status}."\n";
+
+Contains an integer value that represents the status of the job.
+The various integer values are mapped to these constants:
+
+    NONE        = 0
+    RUNNING     = 1
+    UNDEF_2     = 2
+    STARTING    = 3
+    SUCCESS     = 4
+    FAILURE     = 5
+    TERMINATED  = 6
+    ON_ICE      = 7
+    INACTIVE    = 8
+    ACTIVATED   = 9
+    RESTART     = 10
+    ON_HOLD     = 11
+    QUEUE_WAIT  = 12
+    UNDEF_13    = 13
+    REFRESH_DEP = 14
+    REFRESH_FW  = 15
+
+=head2 B<run_num>
+
+    print "run_num: ".$status->{run_num}."\n";
+
+Contains an integer value that shows an AutoSys internal run number.
+It is currently only used to be output-compatible with CA's 'autorep' tool.
+
+=head2 B<ntry>
+
+    print "ntry: ".$status->{ntry}."\n";
+
+Contains an integer that shows how often the run of the job has been retried by AutoSys.
+
+=head2 B<exit_code>
+
+    print "exit_code: ".$status->{exit_code}."\n";
+
+Contains the last exit code of the job.
+
+=head1 SEE ALSO
+
+L<CA::AutoSys::Job|CA::AutoSys::Job>, L<CA::AutoSys|CA::AutoSys>
+
+=head1 AUTHOR
+
+Sinisa Susnjar <sini@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (c) 2007 Sinisa Susnjar. All rights reserved.
+
+This program is free software; you can use and redistribute it under the terms of the L-GPL.
+See the LICENSE file for details.

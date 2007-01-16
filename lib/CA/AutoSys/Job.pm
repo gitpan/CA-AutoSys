@@ -1,8 +1,8 @@
 #
-# $Id: Job.pm 3 2007-01-04 00:21:24Z sini $
+# $Id: Job.pm 14 2007-01-16 10:02:19Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
-# Copyright (c) 2006 Susnjar Software Engineering <sini@susnjar.de>
+# Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
 # See LICENSE for terms of distribution.
 # 
 # This library is free software; you can redistribute it and/or
@@ -130,3 +130,83 @@ sub has_children {
 }	# has_children()
 
 1;
+
+__END__
+
+=head1 NAME
+
+CA::AutoSys::Job - Object representing an AutoSys job.
+
+=head1 INSTANCE METHODS
+
+=head2 B<next_job() >
+
+    my $job = $jobs->next_job() ;
+
+Returns the next job from a list of jobs previously acquired by a call to L<find_jobs()|CA::AutoSys/find_jobs()>.
+
+=head2 B<find_children() >
+
+    my $children = $job->find_children() ;
+
+Returns child jobs for a given job object. The child jobs can be traversed like this:
+
+    my $children = $job->find_children() ;
+    while (my $child = $children->next_child()) {
+        # do something
+        :
+    }
+
+=head2 B<next_child() >
+
+    my $child = $children->next_child() ;
+
+Returns the next child from a list of child jobs previously acquired by a call to L<find_children() >.
+
+=head2 B<get_status() >
+
+    my $status = $job_or_child->get_status() ;
+
+Returns a hashref that can be queried for job status variables.
+See L<CA::AutoSys::Status|CA::AutoSys::Status> for a list of possible status variables.
+
+=head2 B<has_children() >
+
+    my $rc = $job->has_children() ;
+
+Returns 1 if the given job/child has children, 0 otherwise.
+
+=head1 INSTANCE VARIABLES
+
+=head2 B<job_name>
+
+    print "job_name: ".$job->{job_name}."\n";
+
+Contains the name of the AutoSys job.
+
+=head2 B<job_type>
+
+    print "job_type: ".$job->{job_type}."\n";
+
+Contains the type of the job, c=JOB, b=BOX.
+
+=head2 B<joid>
+
+    print "joid: ".$job->{joid}."\n";
+
+Contains the internal job id in the AutoSys database.
+
+=head1 SEE ALSO
+
+L<CA::AutoSys::Status|CA::AutoSys::Status>, L<CA::AutoSys|CA::AutoSys>
+
+=head1 AUTHOR
+
+Sinisa Susnjar <sini@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (c) 2007 Sinisa Susnjar. All rights reserved.
+
+This program is free software; you can use and redistribute it under the terms of the L-GPL.
+See the LICENSE file for details.

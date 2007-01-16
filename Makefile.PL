@@ -1,8 +1,8 @@
 #
-# $Id: Makefile.PL 4 2007-01-04 08:27:00Z sini $
+# $Id: Makefile.PL 14 2007-01-16 10:02:19Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
-# Copyright (c) 2006 Susnjar Software Engineering <sini@susnjar.de>
+# Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
 # See LICENSE for terms of distribution.
 # 
 # This library is free software; you can redistribute it and/or
@@ -27,8 +27,8 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
 	NAME			=> 'CA::AutoSys',
 	VERSION_FROM	=> 'lib/CA/AutoSys.pm',
-	PREREQ_PM		=> { 'DBD::Sybase'  => 1.07 },
+	PREREQ_PM		=> { 'DBD::Sybase' },
 	($] >= 5.005 ?
-		(ABSTRACT	=> 'AutoSys job control',
-		 AUTHOR		=> 'Sinisa Susnjar (sini@susnjar.de)') : ())
+		(ABSTRACT_FROM	=> 'lib/CA/AutoSys.pm',
+		 AUTHOR			=> 'Sinisa Susnjar (sini@cpan.org)') : ())
 );

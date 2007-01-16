@@ -1,10 +1,10 @@
 #!/bin/env perl
 
 #
-# $Id: sendevent 8 2007-01-15 08:29:49Z sini $
+# $Id: sendevent 14 2007-01-16 10:02:19Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
-# Copyright (c) 2006 Susnjar Software Engineering <sini@susnjar.de>
+# Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
 # See LICENSE for terms of distribution.
 # 
 # This library is free software; you can redistribute it and/or

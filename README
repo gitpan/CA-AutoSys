@@ -1,8 +1,8 @@
 #
-# $Id: README 5 2007-01-04 08:40:17Z sini $
+# $Id: README 14 2007-01-16 10:02:19Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
-# Copyright (c) 2006 Susnjar Software Engineering <sini@susnjar.de>
+# Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
 # See LICENSE for terms of distribution.
 # 
 # This library is free software; you can redistribute it and/or
@@ -63,6 +63,7 @@ INSTALLATION
 
     perl Makefile.PL
     make
+	make test
     make install
                                                                      
   Before using the module, you may have to edit your $SYBASE/interfaces file or
@@ -81,4 +82,4 @@ AUTHORS
 
   This module was developed by:
 
-    Sinisa Susnjar <sini@susnjar.de>, <sinisa.susnjar@freenet.de>
+    Sinisa Susnjar <sini@cpan.org>
