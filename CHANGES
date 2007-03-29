@@ -25,6 +25,23 @@ Introduction
   This file documents the changes to each and every release of the
   AutoSys perl API, going back as far as the initial 0.99 release.
 
+Changes for 1.02 - release date 29-mar-2007
+
+  o CA::AutoSys::Status:
+    Method format_time() now returns localtime() instead of gmtime() (bug 24962).
+    Added new instance variable "name" which contains the long name of the
+    appropriate job's status, e.g. "SUCCESS".
+  o CA::AutoSys:
+    Method new() now accepts the option "dsn" with which one should be able to
+    connect to AutoSys databases other than the default (Sybase).
+    Note: I have not tested this feature yet, since I currently only have access
+    to a Sybase backed AutoSys installation. Any feedback is welcome!
+
+Changes for 1.01 - release date 16-jan-2007
+
+  o Added documentation / pods for *.pm files.
+  o Added constants for states in CA::AutoSys::Status.
+
 Changes for 1.00 - release date 15-jan-2007
 
   o Added online help (--help/--man) switches for examples.

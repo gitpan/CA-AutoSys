@@ -1,5 +1,5 @@
 #
-# $Id: Makefile.PL 14 2007-01-16 10:02:19Z sini $
+# $Id: Makefile.PL 28 2007-01-16 13:26:15Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
 # Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>

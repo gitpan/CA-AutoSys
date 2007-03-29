@@ -1,5 +1,5 @@
 #
-# $Id: Status.pm 14 2007-01-16 10:02:19Z sini $
+# $Id: Status.pm 18 2007-01-16 13:12:22Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
 # Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
@@ -26,9 +26,11 @@ use strict;
 use warnings;
 
 use Exporter;
-use vars qw(@ISA @EXPORT);
+use vars qw(@ISA @EXPORT $VERSION);
 @ISA = qw(Exporter);
 @EXPORT = qw(&new &format_status &format_time);
+
+$VERSION = '1.02';
 
 our %status_names = (
 	0 => '  ',	# *empty*
@@ -49,6 +51,44 @@ our %status_names = (
 	15 => 'RF',	# refresh filewatcher
 );
 
+use constant {
+	NONE		=> 0,
+	RUNNING		=> 1,
+	UNDEF_2		=> 2,
+	STARTING	=> 3,
+	SUCCESS		=> 4,
+	FAILURE		=> 5,
+	TERMINATED	=> 6,
+	ON_ICE		=> 7,
+	INACTIVE	=> 8,
+	ACTIVATED	=> 9,
+	RESTART		=> 10,
+	ON_HOLD		=> 11,
+	QUEUE_WAIT	=> 12,
+	UNDEF_13	=> 13,
+	REFRESH_DEP	=> 14,
+	REFRESH_FW	=> 15
+};
+
+our %long_status = (
+	0		=> "NONE",
+	1		=> "RUNNING",
+	2		=> "UNDEF_2",
+	3		=> "STARTING",
+	4		=> "SUCCESS",
+	5		=> "FAILURE",
+	6		=> "TERMINATED",
+	7		=> "ON_ICE",
+	8		=> "INACTIVE",
+	9		=> "ACTIVATED",
+	10		=> "RESTART",
+	11		=> "ON_HOLD",
+	12		=> "QUEUE_WAIT",
+	13		=> "UNDEF_13",
+	14		=> "REFRESH_DEP",
+	15		=> "REFRESH_FW"
+);
+
 sub new {
 	my $self = {};
 	my $class = shift();
@@ -58,6 +98,7 @@ sub new {
 		$self->{last_start} = $args{last_start} ? $args{last_start} : undef;
 		$self->{last_end} = $args{last_end} ? $args{last_end} : undef;
 		$self->{status} = $args{status} ? $args{status} : undef;
+		$self->{name} = $long_status{$self->{status}};
 		$self->{run_num} = $args{run_num} ? $args{run_num} : undef;
 		$self->{ntry} = $args{ntry} ? $args{ntry} : undef;
 		$self->{exit_code} = $args{exit_code} ? $args{exit_code} : undef;
@@ -77,31 +118,12 @@ sub format_time {
 	if (!defined($time) || $time == 999999999) {
 		return "-----";
 	}
-	my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday) = gmtime($time);
+	my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday) = localtime($time);
 	$mon++;
 	$year += 1900;
 	return sprintf("%02d/%02d/%04d  %02d:%02d:%02d", $mon, $mday, $year, $hour, $min, $sec);
 	# return sprintf("%02d/%02d/%04d  %02d:%02d:%02d (%d)", $mon, $mday, $year, $hour, $min, $sec, $time);
 }	# format_time()
-
-use constant {
-	NONE		=> 0,
-	RUNNING		=> 1,
-	UNDEF_2		=> 2,
-	STARTING	=> 3,
-	SUCCESS		=> 4,
-	FAILURE		=> 5,
-	TERMINATED	=> 6,
-	ON_ICE		=> 7,
-	INACTIVE	=> 8,
-	ACTIVATED	=> 9,
-	RESTART		=> 10,
-	ON_HOLD		=> 11,
-	QUEUE_WAIT	=> 12,
-	UNDEF_13	=> 13,
-	REFRESH_DEP	=> 14,
-	REFRESH_FW	=> 15
-};
 
 1;
 
@@ -164,6 +186,31 @@ The various integer values are mapped to these constants:
     UNDEF_13    = 13
     REFRESH_DEP = 14
     REFRESH_FW  = 15
+
+=head2 B<name>
+
+    print "status name: ".$status->{name}."\n";
+
+Contains the long name of the appropriate integer value that represents the status of the job.
+Can be used instead of the more cryptic output of the L<format_status() > method.
+The various integer values are mapped to these constants:
+
+    "NONE"        = 0
+    "RUNNING"     = 1
+    "UNDEF_2"     = 2
+    "STARTING"    = 3
+    "SUCCESS"     = 4
+    "FAILURE"     = 5
+    "TERMINATED"  = 6
+    "ON_ICE"      = 7
+    "INACTIVE"    = 8
+    "ACTIVATED"   = 9
+    "RESTART"     = 10
+    "ON_HOLD"     = 11
+    "QUEUE_WAIT"  = 12
+    "UNDEF_13"    = 13
+    "REFRESH_DEP" = 14
+    "REFRESH_FW"  = 15
 
 =head2 B<run_num>
 

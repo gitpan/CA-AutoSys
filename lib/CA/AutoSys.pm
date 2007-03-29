@@ -1,5 +1,5 @@
 #
-# $Id: AutoSys.pm 15 2007-01-16 10:07:48Z sini $
+# $Id: AutoSys.pm 18 2007-01-16 13:12:22Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
 # Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
@@ -31,31 +31,41 @@ use DBI;
 
 use vars qw($VERSION);
 
-$VERSION = '1.01';
+$VERSION = '1.02';
 
 use Exporter;
 use vars qw(@ISA @EXPORT);
 @ISA = qw(Exporter);
 @EXPORT = qw(&new);
 
+our $errstr;
+
 sub new {
 	my $self = {};
 	my $class = shift();
 
+	$errstr = '';
+
 	if (@_) {
 		my %args = @_;
+		$self->{dsn} = $args{dsn} ? $args{dsn} : undef;
 		$self->{server} = $args{server} ? $args{server} : undef;
 		$self->{user} = $args{user} ? $args{user} : undef;
 		$self->{password} = $args{password} ? $args{password} : undef;
 	}
 
-	if (!defined($self->{server})) {
-		die("missing server name in new()");
+	if (!defined($self->{dsn})) {
+		if (!defined($self->{server})) {
+			$errstr = "missing server name in new()";
+			return undef;
+		}
+		# Default to Sybase when no dsn was given...
+		$self->{dsn} = "dbi:Sybase:server=$self->{server}";
 	}
-
-	$self->{dbh} = DBI->connect("dbi:Sybase:server=$self->{server}", $self->{user}, $self->{password});
+	$self->{dbh} = DBI->connect($self->{dsn}, $self->{user}, $self->{password});
 	if (!$self->{dbh}) {
-		die("can't connect to server $self->{server}: ".$DBI::errstr);
+		$errstr = "can't connect to dsn ".$self->{dsn}.": ".$DBI::errstr;
+		return undef;
 	}
 
 	bless($self);
@@ -72,7 +82,10 @@ sub find_jobs {
 		where	j.job_name like '$job_name'
 		order by j.joid
 	});
-	$sth->execute() or die("can't select info for job $job_name: ".$sth->errstr());
+	if (!$sth->execute()) {
+		$self->{errstr} = "can't select info for job ".$job_name.": ".$sth->errstr();
+		return undef;
+	}
 	return CA::AutoSys::Job->new(database_handle => $self->{dbh}, statement_handle => $sth);
 }	# find_jobs()
 
@@ -135,9 +148,16 @@ Below is a list of valid options:
 
 =over 5
 
+=item B<dsn>
+
+Specify the DSN of the AutoSys' database server to connect to. If nothing is specified, Sybase will be
+assumed: dbi:Sybase:server=<your_server>
+With this option you should be able to connect to databases other than Sybase.
+
 =item B<server>
 
-Specify the AutoSys' database server to connect to.
+Specify the AutoSys' database server to connect to. Either this option or the dsn option above must be given.
+Please note, that when specifying this server option, a Sybase database backend is assumed.
 
 =item B<user>
 

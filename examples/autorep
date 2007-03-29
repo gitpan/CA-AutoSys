@@ -1,7 +1,7 @@
 #!/bin/env perl
 
 #
-# $Id: autorep 14 2007-01-16 10:02:19Z sini $
+# $Id: autorep 17 2007-01-16 10:20:20Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
 # Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
@@ -100,7 +100,6 @@ use warnings;
 
 use Getopt::Long;
 use CA::AutoSys;
-use CA::AutoSys::Status;
 use Pod::Usage;
 
 my $jobname;

@@ -1,5 +1,5 @@
 #
-# $Id: Job.pm 14 2007-01-16 10:02:19Z sini $
+# $Id: Job.pm 36 2007-01-16 14:18:53Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
 # Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
@@ -28,9 +28,11 @@ use strict;
 use warnings;
 
 use Exporter;
-use vars qw(@ISA @EXPORT);
+use vars qw(@ISA @EXPORT $VERSION);
 @ISA = qw(Exporter);
 @EXPORT = qw(&new);
+
+$VERSION = '1.02';
 
 my $debug = 0;
 
@@ -143,7 +145,7 @@ CA::AutoSys::Job - Object representing an AutoSys job.
 
     my $job = $jobs->next_job() ;
 
-Returns the next job from a list of jobs previously acquired by a call to L<find_jobs()|CA::AutoSys/find_jobs()>.
+Returns the next job from a list of jobs previously acquired by a call to L<find_jobs()|CA::AutoSys/find_jobs() >.
 
 =head2 B<find_children() >
 
