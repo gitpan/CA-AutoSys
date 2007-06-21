@@ -25,6 +25,17 @@ Introduction
   This file documents the changes to each and every release of the
   AutoSys perl API, going back as far as the initial 0.99 release.
 
+Changes for 1.03 - release date 21-jun-2007
+
+  o Replaced dependency DBD::Sybase with the more suitable DBI...
+  o Added --dsn option to autorep and sendevent examples.
+  o Added a small example web server for controlling AutoSys jobs.
+  o Added -q option to autorep example.
+  o Cleaned up the DBI mess (a little bit at least).
+  o Moved the examples autorep and sendevent to bin directory.
+  o Added a small example that shows howto control your AutoSys jobs
+    via a web frontend.
+
 Changes for 1.02 - release date 29-mar-2007
 
   o CA::AutoSys::Status:
@@ -34,8 +45,9 @@ Changes for 1.02 - release date 29-mar-2007
   o CA::AutoSys:
     Method new() now accepts the option "dsn" with which one should be able to
     connect to AutoSys databases other than the default (Sybase).
-    Note: I have not tested this feature yet, since I currently only have access
-    to a Sybase backed AutoSys installation. Any feedback is welcome!
+    Note: I have not tested this feature with databases other than Sybase yet,
+	since I currently only have access to a Sybase backed AutoSys installation.
+	Any feedback is welcome!
 
 Changes for 1.01 - release date 16-jan-2007
 

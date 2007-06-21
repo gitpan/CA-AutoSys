@@ -1,5 +1,5 @@
 #
-# $Id: TODO 30 2007-01-16 13:26:50Z sini $
+# $Id: TODO 38 2007-06-21 10:47:06Z sini $
 #
 
 This is a short todo list for myself:
@@ -8,9 +8,17 @@ This is a short todo list for myself:
 
 2) Add more features.
 
-3) Add documentation / pod.
+3) Add more documentation / examples.
 
-4) Improve performance of job / sub-job queries:
+4) Perform automatic sorting of displayed jobs in autorep based on start times,
+   job dependencies, etc... (original autorep doesn't have that and I think
+   it's a nifty feature...)
+
+5) Improve performance of job / sub-job queries:
+
+6) Add more automatic tests.
+
+7) Implement "jil" ;-)
 
 #
 # First, we will get the jobs matching the given job name:

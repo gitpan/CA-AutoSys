@@ -1,7 +1,11 @@
+bin/autorep
+bin/sendevent
 CHANGES
 COPYRIGHT
-examples/autorep
-examples/sendevent
+examples/web/autosys.html
+examples/web/blink.htc
+examples/web/httpd.pl
+examples/web/README
 lib/CA/AutoSys.pm
 lib/CA/AutoSys/Job.pm
 lib/CA/AutoSys/Status.pm

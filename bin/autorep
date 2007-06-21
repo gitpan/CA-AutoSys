@@ -1,7 +1,7 @@
 #!/bin/env perl
 
 #
-# $Id: autorep 17 2007-01-16 10:20:20Z sini $
+# $Id: autorep 45 2007-06-21 11:01:37Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
 # Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
@@ -40,15 +40,25 @@ Specify the job name to be queried. Wildcards can be specified with %, e.g:
 autorep -J MY_JOBS% would return a status report for all jobs beginning with
 the string MY_JOBS.
 
+=item B<-q>
+
+Query the definition of the given job(s).
+
 =item B<-w [width] | --width [width]>
 
 Specify the display width to use. If no width is given, we will use a default
 width of 120 characters.
 COMPATIBILITY NOTE: specifying a width is not possible with CA's original autorep tool.
 
+=item B<--dsn dsn>
+
+Specify the AutoSys' database dsn to connect to.
+COMPATIBILITY NOTE: this option does not exist in CA's original autorep tool.
+
 =item B<-S server | --server server>
 
-Specify the AutoSys' database server to connect to.
+Specify the AutoSys' database server to connect to. Either this option or the dsn option above must be given.
+Please note, that when specifying this server option, a Sybase database backend is assumed.
 COMPATIBILITY NOTE: this option does not exist in CA's original autorep tool.
 
 =item B<-U user | --user user>
@@ -102,20 +112,31 @@ use Getopt::Long;
 use CA::AutoSys;
 use Pod::Usage;
 
-my $jobname;
+my ($jobname, $dsn, $hdl);
+my $query = 0;
 my $width = 80;
 my $rest = 80 - 28; # standard width - remainder of line after job name = 52
 my ($server, $user, $password) = qw(AUTOSYS_DEV autosys autosys);
 
 GetOptions(	"job|J=s"		=> \$jobname,
+			"dsn=s"			=> \$dsn,
 			"server|S=s"	=> \$server,
+			"q"				=> \$query,
 			"user|U=s"		=> \$user,
 			"password|P=s"	=> \$password,
 			"width|w:120"	=> \$width,
 			"help|?"		=> sub { pod2usage(1); exit(0); },
 			"man"			=> sub { pod2usage(-verbose => 2); exit(0); } ) or pod2usage(1);
 
-my $hdl = CA::AutoSys->new(server => $server, user => $user, password => $password);
+if (!$jobname) {
+	die("No jobname given!\n");
+}
+
+if ($dsn) {
+	$hdl = CA::AutoSys->new(dsn => $dsn, user => $user, password => $password);
+} else {
+	$hdl = CA::AutoSys->new(server => $server, user => $user, password => $password);
+}
 
 my $jobs = $hdl->find_jobs($jobname);
 
@@ -149,10 +170,69 @@ sub print_job_status {
 	}
 }	# print_job_status()
 
-printf("%-*s     Last Start            Last End        ST  Run  Pri/Xit\n", $width-$rest, "Job Name");
-printf("%-*s ____________________ ____________________ __ _______ ___\n\n", $width-$rest, "_"x($width-$rest));
+# prints a job's definition
+sub print_job_definition {
+	my $job = shift();
+	my $level = shift();
+
+	printf("\n\n%*s/* ----------------- %s ----------------- */\n\n", $level*2, "", $job->{job_name});
+
+	printf("%*sinsert_job: %s   job_type: %s\n", $level*2, "", $job->{job_name}, $job->{job_type});
+
+	if (defined($job->{box_name}) && $job->{box_name} ne "") {
+		printf("%*sbox_name: %s\n", $level*2, "", $job->{box_name});
+	}
+	if (defined($job->{command}) && $job->{command} ne "") {
+		printf("%*scommand: %s\n", $level*2, "", $job->{command});
+	}
+	if (defined($job->{machine}) && $job->{machine} ne "") {
+		printf("%*smachine: %s\n", $level*2, "", $job->{machine});
+	}
+
+	printf("%*s#owner: %s\n", $level*2, "", $job->{owner});
+	printf("%*spermission: %s\n", $level*2, "", $job->{permission});
+	if ($job->{date_conditions} > 0) {
+		printf("%*sdate_conditions: %s\n", $level*2, "", $job->{date_conditions});
+		printf("%*sdays_of_week: %s\n", $level*2, "", $job->{days_of_week});
+		printf("%*sstart_times: \"%s\"\n", $level*2, "", $job->{start_times});
+	} elsif (defined($job->{condition}) && $job->{condition} ne "") {
+		printf("%*scondition: %s\n", $level*2, "", $job->{condition});
+	}
+	printf("%*sdescription: \"%s\"\n", $level*2, "", $job->{description});
+
+	if (defined($job->{std_out_file}) && $job->{std_out_file} ne "") {
+		printf("%*sstd_out_file: %s\n", $level*2, "", $job->{std_out_file});
+	}
+	if (defined($job->{std_err_file}) && $job->{std_err_file} ne "") {
+		printf("%*sstd_err_file: %s\n", $level*2, "", $job->{std_err_file});
+	}
+	if ($job->{max_run_alarm} > 0) {
+		printf("%*smax_run_alarm: %s\n", $level*2, "", $job->{max_run_alarm});
+	}
+	printf("%*salarm_if_fail: %s\n", $level*2, "", $job->{alarm_if_fail});
+
+	# find this job's children
+	my $children = $job->find_children();
+
+	# loop through all children...
+	while (my $child = $children->next_child()) {
+		# print child's definition
+		print_job_definition($child, $level+1);
+	}
+
+}	# print_job_definition()
+
+if (!$query) {
+	printf("%-*s     Last Start            Last End        ST  Run  Pri/Xit\n", $width-$rest, "Job Name");
+	printf("%-*s ____________________ ____________________ __ _______ ___\n\n", $width-$rest, "_"x($width-$rest));
+}
 
 # loop through all jobs...
 while (my $job = $jobs->next_job()) {
-	print_job_status($job, 0);
+	if ($query) {
+		print_job_definition($job, 0);
+		printf("\n");
+	} else {
+		print_job_status($job, 0);
+	}
 }

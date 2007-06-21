@@ -1,5 +1,5 @@
 #
-# $Id: Status.pm 18 2007-01-16 13:12:22Z sini $
+# $Id: Status.pm 40 2007-06-21 10:52:28Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
 # Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
@@ -30,7 +30,7 @@ use vars qw(@ISA @EXPORT $VERSION);
 @ISA = qw(Exporter);
 @EXPORT = qw(&new &format_status &format_time);
 
-$VERSION = '1.02';
+$VERSION = '1.03';
 
 our %status_names = (
 	0 => '  ',	# *empty*

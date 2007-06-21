@@ -1,5 +1,5 @@
 #
-# $Id: Job.pm 36 2007-01-16 14:18:53Z sini $
+# $Id: Job.pm 41 2007-06-21 10:52:42Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
 # Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
@@ -32,7 +32,7 @@ use vars qw(@ISA @EXPORT $VERSION);
 @ISA = qw(Exporter);
 @EXPORT = qw(&new);
 
-$VERSION = '1.02';
+$VERSION = '1.03';
 
 my $debug = 0;
 
@@ -42,6 +42,7 @@ sub new {
 
 	if (@_) {
 		my %args = @_;
+		$self->{parent} = $args{parent} ? $args{parent} : undef;
 		$self->{dbh} = $args{database_handle} ? $args{database_handle} : undef;
 		$self->{sth} = $args{statement_handle} ? $args{statement_handle} : undef;
 		$self->{parent_job} = $args{parent_job} ? $args{parent_job} : undef;
@@ -55,22 +56,114 @@ sub new {
 	return $self;
 }	# new()
 
-sub next_job {
+sub _fetch_next {
 	my $self = shift();
 	if ($debug) {
-		printf("DEBUG: Job(%s): next_job()\n", $self);
+		printf("DEBUG: Job(%s): _fetch_next()\n", $self);
 	}
-	my ($job_name, $job_type, $joid, $last_start, $last_end, $status, $run_num, $ntry, $exit_code);
-	if (($job_name, $job_type, $joid, $last_start, $last_end, $status, $run_num, $ntry, $exit_code) = $self->{sth}->fetchrow_array()) {
+	my ($job_name, $job_type, $joid, $last_start, $last_end, $status, $run_num, $ntry, $exit_code, $owner,
+		$permission, $date_conditions, $days_of_week, $start_times, $description, $alarm_if_fail, $condition,
+		$command, $std_out_file, $std_err_file, $machine, $max_run_alarm, $box_name);
+
+	if (($job_name, $job_type, $joid, $last_start, $last_end, $status, $run_num, $ntry, $exit_code, $owner,
+		$permission, $date_conditions, $days_of_week, $start_times, $description, $alarm_if_fail, $condition,
+		$command, $std_out_file, $std_err_file, $machine, $max_run_alarm, $box_name) = $self->{sth}->fetchrow_array()) {
+		if (defined($self->{parent_job})) {
+			$self->{parent_job}->{child_cnt}++;
+		}
+		$condition =~ s/^[ ]*$//g;
+		$command =~ s/^[ ]*$//g;
+		$machine =~ s/^[ ]*$//g;
+		$std_out_file =~ s/^[ ]*$//g;
+		$std_err_file =~ s/^[ ]*$//g;
 		$self->{job_name} = $job_name;
 		$self->{job_type} = $job_type;
 		$self->{joid} = $joid;
-		$self->{status} = CA::AutoSys::Status->new(last_start => $last_start, last_end => $last_end, status => $status, run_num => $run_num, ntry => $ntry, exit_code => $exit_code);
+		$self->{owner} = $owner;
+		$self->{permission} = $permission;
+		$self->{date_conditions} = $date_conditions;
+		$self->{days_of_week} = $days_of_week;
+		$self->{start_times} = $start_times;
+		$self->{description} = $description;
+		$self->{alarm_if_fail} = $alarm_if_fail;
+		$self->{condition} = $condition;
+		$self->{command} = $command;
+		$self->{std_out_file} = $std_out_file;
+		$self->{std_err_file} = $std_err_file;
+		$self->{machine} = $machine;
+		$self->{max_run_alarm} = $max_run_alarm;
+		$self->{box_name} = $box_name;
+		$self->{status} = CA::AutoSys::Status->new(parent => $self->{parent}, last_start => $last_start,
+													last_end => $last_end, status => $status, run_num => $run_num,
+													ntry => $ntry, exit_code => $exit_code);
 		return $self;
 	} else {
 		$self->{sth}->finish();
 		return undef;
 	}
+}	# _fetch_next()
+
+sub _query {
+	my $query = qq{
+		select	j.job_name, j.job_type, j.joid, s.last_start, s.last_end, s.status, s.run_num, s.ntry, s.exit_code,
+				j.owner, j.permission, j.date_conditions, j.days_of_week, j.start_times, j.description,
+				j.alarm_if_fail, j.condition, j.command, j.std_out_file, j.std_err_file, j.machine, j.max_run_alarm,
+				j2.job_name as box_name
+		from	job j join job_status s
+		on		j.joid = s.joid
+		left outer join job j2
+		on		j.box_joid = j2.joid
+	};
+	return $query;
+}	# _query()
+
+sub find_jobs {
+	my $self = shift();
+	if ($debug) {
+		printf("DEBUG: Job(%s): find_jobs()\n", $self);
+	}
+	my $job_name = shift();
+	my $query = _query() . qq{
+		where	j.job_name like '$job_name'
+		order by j.joid
+	};
+	my $sth = $self->{dbh}->prepare($query);
+	if (!$sth->execute()) {
+		$self->{parent}->{errstr} = "can't select info for job ".$job_name.": ".$sth->errstr();
+		return undef;
+	}
+	return CA::AutoSys::Job->new(parent => $self->{parent}, database_handle => $self->{dbh},
+								statement_handle => $sth);
+}	# find_jobs()
+
+sub find_children {
+	my $self = shift();
+	if ($debug) {
+		printf("DEBUG: Job(%s): find_children()\n", $self);
+	}
+	my $query = _query() . qq{
+		where	j.box_joid = $self->{joid}
+		order by j.joid
+	};
+	my $sth = $self->{dbh}->prepare($query);
+	if ($debug) {
+		printf("DEBUG: Job(%s): selecting children for joid %d\n", $self, $self->{joid});
+	}
+	$self->{child_cnt} = 0;
+	if (!$sth->execute()) {
+		$self->{parent}->{errstr} = "can't select children for job ".$self->{job_name}.": ".$sth->errstr();
+		return undef;
+	}
+	return CA::AutoSys::Job->new(parent => $self->{parent}, database_handle => $self->{dbh},
+								statement_handle => $sth, parent_job => $self);
+}	# find_children()
+
+sub next_job {
+	my $self = shift();
+	if ($debug) {
+		printf("DEBUG: Job(%s): next_job()\n", $self);
+	}
+	return $self->_fetch_next();
 }	# next_job()
 
 sub next_child {
@@ -78,39 +171,8 @@ sub next_child {
 	if ($debug) {
 		printf("DEBUG: Job(%s): next_child()\n", $self);
 	}
-	my ($job_name, $job_type, $joid, $last_start, $last_end, $status, $run_num, $ntry, $exit_code);
-	if (($job_name, $job_type, $joid, $last_start, $last_end, $status, $run_num, $ntry, $exit_code) = $self->{sth}->fetchrow_array()) {
-		$self->{parent_job}->{child_cnt}++;
-		$self->{job_name} = $job_name;
-		$self->{job_type} = $job_type;
-		$self->{joid} = $joid;
-		$self->{status} = CA::AutoSys::Status->new(last_start => $last_start, last_end => $last_end, status => $status, run_num => $run_num, ntry => $ntry, exit_code => $exit_code);
-		return $self;
-	} else {
-		$self->{sth}->finish();
-		return undef;
-	}
+	return $self->_fetch_next();
 }	# next_child()
-
-sub find_children {
-	my $self = shift();
-	if ($debug) {
-		printf("DEBUG: Job(%s): find_children()\n", $self);
-	}
-	my $sth = $self->{dbh}->prepare(qq{
-		select	j.job_name, j.job_type, j.joid, s.last_start, s.last_end, s.status, s.run_num, s.ntry, s.exit_code
-		from	job j join job_status s
-		on		j.joid = s.joid
-		where	j.box_joid = $self->{joid}
-		order by j.joid
-	});
-	if ($debug) {
-		printf("DEBUG: Job(%s): selecting children for joid %d\n", $self, $self->{joid});
-	}
-	$self->{child_cnt} = 0;
-	$sth->execute() or die("can't select children for job $self->{job_name}: ".$sth->errstr());
-	return CA::AutoSys::Job->new(database_handle => $self->{dbh}, statement_handle => $sth, parent_job => $self);
-}	# find_children()
 
 sub get_status {
 	my $self = shift();

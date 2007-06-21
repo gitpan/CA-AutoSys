@@ -1,5 +1,5 @@
 #
-# $Id: AutoSys.pm 18 2007-01-16 13:12:22Z sini $
+# $Id: AutoSys.pm 39 2007-06-21 10:50:59Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
 # Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
@@ -31,7 +31,7 @@ use DBI;
 
 use vars qw($VERSION);
 
-$VERSION = '1.02';
+$VERSION = '1.03';
 
 use Exporter;
 use vars qw(@ISA @EXPORT);
@@ -56,7 +56,7 @@ sub new {
 
 	if (!defined($self->{dsn})) {
 		if (!defined($self->{server})) {
-			$errstr = "missing server name in new()";
+			$errstr = "no dsn given in new()";
 			return undef;
 		}
 		# Default to Sybase when no dsn was given...
@@ -75,18 +75,8 @@ sub new {
 sub find_jobs {
 	my $self = shift();
 	my $job_name = shift();
-	my $sth = $self->{dbh}->prepare(qq{
-		select	j.job_name, j.job_type, j.joid, s.last_start, s.last_end, s.status, s.run_num, s.ntry, s.exit_code
-		from	job j join job_status s
-		on		j.joid = s.joid
-		where	j.job_name like '$job_name'
-		order by j.joid
-	});
-	if (!$sth->execute()) {
-		$self->{errstr} = "can't select info for job ".$job_name.": ".$sth->errstr();
-		return undef;
-	}
-	return CA::AutoSys::Job->new(database_handle => $self->{dbh}, statement_handle => $sth);
+	my $job = CA::AutoSys::Job->new(parent => $self, database_handle => $self->{dbh});
+	return $job->find_jobs($job_name);
 }	# find_jobs()
 
 sub send_event {
@@ -156,6 +146,7 @@ With this option you should be able to connect to databases other than Sybase.
 
 =item B<server>
 
+This option is deprecated - rather use the dsn option.
 Specify the AutoSys' database server to connect to. Either this option or the dsn option above must be given.
 Please note, that when specifying this server option, a Sybase database backend is assumed.
 

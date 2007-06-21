@@ -1,7 +1,7 @@
 #!/bin/env perl
 
 #
-# $Id: sendevent 14 2007-01-16 10:02:19Z sini $
+# $Id: sendevent 45 2007-06-21 11:01:37Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
 # Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
@@ -52,9 +52,15 @@ when the specified time is reached. Timespec should look like: 'mm/dd/yyyy HH:MM
 
 Specify the job status for the event CHANGE_STATUS. See man page for a list of possible states.
 
+=item B<--dsn dsn>
+
+Specify the AutoSys' database dsn to connect to.
+COMPATIBILITY NOTE: this option does not exist in CA's original autorep tool.
+
 =item B<-S server | --server server>
 
-Specify the AutoSys' database server to connect to.
+Specify the AutoSys' database server to connect to. Either this option or the dsn option above must be given.
+Please note, that when specifying this server option, a Sybase database backend is assumed.
 COMPATIBILITY NOTE: this option does not exist in CA's original autorep tool.
 
 =item B<-U user | --user user>
@@ -120,41 +126,37 @@ use Getopt::Long qw(:config no_ignore_case bundling);
 use CA::AutoSys;
 use Pod::Usage;
 
-my $jobname;
-my $event;
-my $status;
-my $eventtime;
+my ($jobname, $event, $status, $dsn, $eventtime, $hdl, %event_args);
 my ($server, $user, $password) = qw(AUTOSYS_DEV autosys autosys);
 
 GetOptions(	"event|E=s"		=> \$event,
 			"job|J=s"		=> \$jobname,
 			"time|T=s"		=> \$eventtime,
 			"status|s=s"	=> \$status,
+			"dsn=s"			=> \$dsn,
 			"server|S=s"	=> \$server,
 			"user|U=s"		=> \$user,
 			"password|P=s"	=> \$password,
 			"help|?"		=> sub { pod2usage(1); exit(0); },
 			"man"			=> sub { pod2usage(-verbose => 2); exit(0); } ) or pod2usage(1);
 
-my $hdl = CA::AutoSys->new(server => $server, user => $user, password => $password);
-
-my %event_args;
-
-if (defined($jobname)) {
-	$event_args{job_name} = $jobname;
+if (!$event) {
+	die("No event given!\n");
 }
 
-if (defined($event)) {
-	$event_args{event} = $event;
+if ($dsn) {
+	$hdl = CA::AutoSys->new(dsn => $dsn, user => $user, password => $password);
+} else {
+	$hdl = CA::AutoSys->new(server => $server, user => $user, password => $password);
 }
 
-if (defined($status)) {
-	$event_args{status} = $status;
-}
+if (defined($jobname)) { $event_args{job_name} = $jobname; }
 
-if (defined($eventtime)) {
-	$event_args{eventtime} = $eventtime;
-}
+if (defined($event)) { $event_args{event} = $event; }
+
+if (defined($status)) { $event_args{status} = $status; }
+
+if (defined($eventtime)) { $event_args{eventtime} = $eventtime; }
 
 # send off the event
 my $rc = $hdl->send_event(%event_args);
