@@ -1,8 +1,8 @@
 #
-# $Id: README 43 2007-06-21 10:54:39Z sini $
+# $Id: README 57 2007-10-26 15:10:55Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
-# Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
+# Copyright (c) 2007 Sinisa Susnjar <sini@cpan.org>
 # See LICENSE for terms of distribution.
 # 
 # This library is free software; you can redistribute it and/or
@@ -47,6 +47,7 @@ INTRODUCTION
     Operating System          AutoSys Version Perl Version FreeTDS Version
     ========================= =============== ============ ===============
     Cygwin 1.5.23 (WinXP SP2) 4.5             5.8.7        0.64
+    openSUSE 10.3 (i586)      4.5             5.8.8        0.64
 
   NOTE: If you have built it on new platforms, *PLEASE* help save the free
   world by letting me know what version of AutoSys, OS, perl,

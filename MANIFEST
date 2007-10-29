@@ -2,6 +2,8 @@ bin/autorep
 bin/sendevent
 CHANGES
 COPYRIGHT
+examples/relay/autorelay
+examples/relay/README
 examples/web/autosys.html
 examples/web/blink.htc
 examples/web/httpd.pl

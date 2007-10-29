@@ -2,7 +2,7 @@
 # $Id$
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
-# Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
+# Copyright (c) 2007 Sinisa Susnjar <sini@cpan.org>
 # See LICENSE for terms of distribution.
 # 
 # This library is free software; you can redistribute it and/or
@@ -24,6 +24,11 @@ Introduction
 
   This file documents the changes to each and every release of the
   AutoSys perl API, going back as far as the initial 0.99 release.
+
+Changes for 1.04 - release date 29-oct-2007
+
+  o Added status_time variable to CA::AutoSys::Status.
+  o Added autorelay example.
 
 Changes for 1.03 - release date 21-jun-2007
 

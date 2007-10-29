@@ -1,8 +1,8 @@
 #
-# $Id: Job.pm 41 2007-06-21 10:52:42Z sini $
+# $Id: Job.pm 57 2007-10-26 15:10:55Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
-# Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
+# Copyright (c) 2007 Sinisa Susnjar <sini@cpan.org>
 # See LICENSE for terms of distribution.
 # 
 # This library is free software; you can redistribute it and/or
@@ -61,11 +61,11 @@ sub _fetch_next {
 	if ($debug) {
 		printf("DEBUG: Job(%s): _fetch_next()\n", $self);
 	}
-	my ($job_name, $job_type, $joid, $last_start, $last_end, $status, $run_num, $ntry, $exit_code, $owner,
+	my ($job_name, $job_type, $joid, $last_start, $last_end, $status, $status_time, $run_num, $ntry, $exit_code, $owner,
 		$permission, $date_conditions, $days_of_week, $start_times, $description, $alarm_if_fail, $condition,
 		$command, $std_out_file, $std_err_file, $machine, $max_run_alarm, $box_name);
 
-	if (($job_name, $job_type, $joid, $last_start, $last_end, $status, $run_num, $ntry, $exit_code, $owner,
+	if (($job_name, $job_type, $joid, $last_start, $last_end, $status, $status_time, $run_num, $ntry, $exit_code, $owner,
 		$permission, $date_conditions, $days_of_week, $start_times, $description, $alarm_if_fail, $condition,
 		$command, $std_out_file, $std_err_file, $machine, $max_run_alarm, $box_name) = $self->{sth}->fetchrow_array()) {
 		if (defined($self->{parent_job})) {
@@ -95,7 +95,8 @@ sub _fetch_next {
 		$self->{box_name} = $box_name;
 		$self->{status} = CA::AutoSys::Status->new(parent => $self->{parent}, last_start => $last_start,
 													last_end => $last_end, status => $status, run_num => $run_num,
-													ntry => $ntry, exit_code => $exit_code);
+													ntry => $ntry, exit_code => $exit_code,
+													status_time => $status_time);
 		return $self;
 	} else {
 		$self->{sth}->finish();
@@ -105,7 +106,7 @@ sub _fetch_next {
 
 sub _query {
 	my $query = qq{
-		select	j.job_name, j.job_type, j.joid, s.last_start, s.last_end, s.status, s.run_num, s.ntry, s.exit_code,
+		select	j.job_name, j.job_type, j.joid, s.last_start, s.last_end, s.status, s.status_time, s.run_num, s.ntry, s.exit_code,
 				j.owner, j.permission, j.date_conditions, j.days_of_week, j.start_times, j.description,
 				j.alarm_if_fail, j.condition, j.command, j.std_out_file, j.std_err_file, j.machine, j.max_run_alarm,
 				j2.job_name as box_name

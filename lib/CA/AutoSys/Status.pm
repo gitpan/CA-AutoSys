@@ -1,8 +1,8 @@
 #
-# $Id: Status.pm 40 2007-06-21 10:52:28Z sini $
+# $Id: Status.pm 57 2007-10-26 15:10:55Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
-# Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
+# Copyright (c) 2007 Sinisa Susnjar <sini@cpan.org>
 # See LICENSE for terms of distribution.
 # 
 # This library is free software; you can redistribute it and/or
@@ -98,6 +98,7 @@ sub new {
 		$self->{last_start} = $args{last_start} ? $args{last_start} : undef;
 		$self->{last_end} = $args{last_end} ? $args{last_end} : undef;
 		$self->{status} = $args{status} ? $args{status} : undef;
+		$self->{status_time} = $args{status_time} ? $args{status_time} : undef;
 		$self->{name} = $long_status{$self->{status}};
 		$self->{run_num} = $args{run_num} ? $args{run_num} : undef;
 		$self->{ntry} = $args{ntry} ? $args{ntry} : undef;
@@ -186,6 +187,13 @@ The various integer values are mapped to these constants:
     UNDEF_13    = 13
     REFRESH_DEP = 14
     REFRESH_FW  = 15
+
+=head2 B<status_time>
+
+    print "status_time: ".$status->{status_time}."\n";
+
+Contains the time of the last status change or 999999999 (CA's equivalent for never).
+Time is measured in non leap seconds since the epoch, i.e. like the return value of perl's time() function.
 
 =head2 B<name>
 

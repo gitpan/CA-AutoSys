@@ -1,8 +1,8 @@
 #
-# $Id: AutoSys.pm 39 2007-06-21 10:50:59Z sini $
+# $Id: AutoSys.pm 57 2007-10-26 15:10:55Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
-# Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
+# Copyright (c) 2007 Sinisa Susnjar <sini@cpan.org>
 # See LICENSE for terms of distribution.
 # 
 # This library is free software; you can redistribute it and/or
@@ -31,7 +31,7 @@ use DBI;
 
 use vars qw($VERSION);
 
-$VERSION = '1.03';
+$VERSION = '1.04';
 
 use Exporter;
 use vars qw(@ISA @EXPORT);

@@ -1,10 +1,10 @@
-#!/bin/env perl
+#!/usr/bin/env perl
 
 #
-# $Id: sendevent 45 2007-06-21 11:01:37Z sini $
+# $Id: sendevent 61 2007-10-29 17:46:55Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
-# Copyright (c) 2007 Susnjar Software Engineering <sini@susnjar.de>
+# Copyright (c) 2007 Sinisa Susnjar <sini@cpan.org>
 # See LICENSE for terms of distribution.
 # 
 # This library is free software; you can redistribute it and/or
@@ -85,7 +85,10 @@ Prints the manual page and exits.
 
 =head1 DESCRIPTION
 
-This program will send event a la CA's original sendevent tool.
+This program will send an event a la CA's original sendevent tool.
+Please be aware that this tool does not perform the security checks like AutoSys' original sendevent,
+i.e. it allows you to send events to virtually all jobs & boxes on an AutoSys instance - regardless
+if you have been allowed to or not by the job creator.
 
 Quick overview of possible events in alphabetical order:
 
@@ -115,7 +118,7 @@ The following options are not yet implemented:
 
 =head1 AUTHOR
 
-Sinisa Susnjar <sinisa.susnjar@freenet.de>
+Sinisa Susnjar <sini@cpan.org>
 
 =cut
 
