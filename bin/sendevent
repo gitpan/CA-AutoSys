@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 #
-# $Id: sendevent 61 2007-10-29 17:46:55Z sini $
+# $Id: sendevent 64 2007-11-02 12:01:18Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
 # Copyright (c) 2007 Sinisa Susnjar <sini@cpan.org>
@@ -24,7 +24,7 @@
 
 =head1 NAME
 
-autorep - A rather naive and incomplete remake of the "sendevent" tool.
+sendevent - A rather naive and incomplete remake of the "sendevent" tool.
 
 =head1 SYNOPSIS
 
@@ -55,23 +55,23 @@ Specify the job status for the event CHANGE_STATUS. See man page for a list of p
 =item B<--dsn dsn>
 
 Specify the AutoSys' database dsn to connect to.
-COMPATIBILITY NOTE: this option does not exist in CA's original autorep tool.
+COMPATIBILITY NOTE: this option does not exist in CA's original sendevent tool.
 
 =item B<-S server | --server server>
 
 Specify the AutoSys' database server to connect to. Either this option or the dsn option above must be given.
 Please note, that when specifying this server option, a Sybase database backend is assumed.
-COMPATIBILITY NOTE: this option does not exist in CA's original autorep tool.
+COMPATIBILITY NOTE: this option does not exist in CA's original sendevent tool.
 
 =item B<-U user | --user user>
 
 Specify the database user. With an out-of-the-box AutoSys installation, the default user should work.
-COMPATIBILITY NOTE: this option does not exist in CA's original autorep tool.
+COMPATIBILITY NOTE: this option does not exist in CA's original sendevent tool.
 
 =item B<-P password | --password password>
 
 Specify the database password. With an out-of-the-box AutoSys installation, the default password should work.
-COMPATIBILITY NOTE: this option does not exist in CA's original autorep tool.
+COMPATIBILITY NOTE: this option does not exist in CA's original sendevent tool.
 
 =item B<--help>
 

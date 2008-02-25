@@ -25,6 +25,14 @@ Introduction
   This file documents the changes to each and every release of the
   AutoSys perl API, going back as far as the initial 0.99 release.
 
+Changes for 1.05 - release date 11-feb-2008
+
+  o CA::AutoSys::Job:
+    Variable substitutions are now only performed when the variable is set (bug 31726).
+  o Added sample config for autorelay example.
+  o Simplified select statement for job selection in CA::AutoSys::Job.
+  o Improved output of autorep -q.
+
 Changes for 1.04 - release date 29-oct-2007
 
   o Added status_time variable to CA::AutoSys::Status.

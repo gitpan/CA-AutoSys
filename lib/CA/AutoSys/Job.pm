@@ -1,5 +1,5 @@
 #
-# $Id: Job.pm 57 2007-10-26 15:10:55Z sini $
+# $Id: Job.pm 67 2008-02-11 10:49:36Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
 # Copyright (c) 2007 Sinisa Susnjar <sini@cpan.org>
@@ -48,9 +48,7 @@ sub new {
 		$self->{parent_job} = $args{parent_job} ? $args{parent_job} : undef;
 	}
 
-	if ($debug) {
-		printf("DEBUG: Job(%s) created.\n", $self);
-	}
+	if ($debug) { printf("DEBUG: Job(%s) created.\n", $self); }
 
 	bless($self);
 	return $self;
@@ -58,45 +56,20 @@ sub new {
 
 sub _fetch_next {
 	my $self = shift();
-	if ($debug) {
-		printf("DEBUG: Job(%s): _fetch_next()\n", $self);
-	}
-	my ($job_name, $job_type, $joid, $last_start, $last_end, $status, $status_time, $run_num, $ntry, $exit_code, $owner,
-		$permission, $date_conditions, $days_of_week, $start_times, $description, $alarm_if_fail, $condition,
-		$command, $std_out_file, $std_err_file, $machine, $max_run_alarm, $box_name);
-
-	if (($job_name, $job_type, $joid, $last_start, $last_end, $status, $status_time, $run_num, $ntry, $exit_code, $owner,
-		$permission, $date_conditions, $days_of_week, $start_times, $description, $alarm_if_fail, $condition,
-		$command, $std_out_file, $std_err_file, $machine, $max_run_alarm, $box_name) = $self->{sth}->fetchrow_array()) {
+	if ($debug) { printf("DEBUG: Job(%s): _fetch_next()\n", $self); }
+	if (my $h = $self->{sth}->fetchrow_hashref()) {
 		if (defined($self->{parent_job})) {
 			$self->{parent_job}->{child_cnt}++;
 		}
-		$condition =~ s/^[ ]*$//g;
-		$command =~ s/^[ ]*$//g;
-		$machine =~ s/^[ ]*$//g;
-		$std_out_file =~ s/^[ ]*$//g;
-		$std_err_file =~ s/^[ ]*$//g;
-		$self->{job_name} = $job_name;
-		$self->{job_type} = $job_type;
-		$self->{joid} = $joid;
-		$self->{owner} = $owner;
-		$self->{permission} = $permission;
-		$self->{date_conditions} = $date_conditions;
-		$self->{days_of_week} = $days_of_week;
-		$self->{start_times} = $start_times;
-		$self->{description} = $description;
-		$self->{alarm_if_fail} = $alarm_if_fail;
-		$self->{condition} = $condition;
-		$self->{command} = $command;
-		$self->{std_out_file} = $std_out_file;
-		$self->{std_err_file} = $std_err_file;
-		$self->{machine} = $machine;
-		$self->{max_run_alarm} = $max_run_alarm;
-		$self->{box_name} = $box_name;
-		$self->{status} = CA::AutoSys::Status->new(parent => $self->{parent}, last_start => $last_start,
-													last_end => $last_end, status => $status, run_num => $run_num,
-													ntry => $ntry, exit_code => $exit_code,
-													status_time => $status_time);
+		foreach (keys %{ $h }) {
+			$self->{$_} = $h->{$_};
+			$self->{$_} =~ s/^[ ]*$//g if ($self->{$_});
+		}
+		$self->{status} = CA::AutoSys::Status->new(parent => $self->{parent}, last_start => $self->{last_start},
+													last_end => $self->{last_end}, status => $self->{status},
+													run_num => $self->{run_num}, ntry => $self->{ntry},
+													exit_code => $self->{exit_code},
+													status_time => $self->{status_time});
 		return $self;
 	} else {
 		$self->{sth}->finish();
@@ -106,10 +79,7 @@ sub _fetch_next {
 
 sub _query {
 	my $query = qq{
-		select	j.job_name, j.job_type, j.joid, s.last_start, s.last_end, s.status, s.status_time, s.run_num, s.ntry, s.exit_code,
-				j.owner, j.permission, j.date_conditions, j.days_of_week, j.start_times, j.description,
-				j.alarm_if_fail, j.condition, j.command, j.std_out_file, j.std_err_file, j.machine, j.max_run_alarm,
-				j2.job_name as box_name
+		select	j.*, s.*, j2.job_name as box_name
 		from	job j join job_status s
 		on		j.joid = s.joid
 		left outer join job j2
@@ -120,9 +90,7 @@ sub _query {
 
 sub find_jobs {
 	my $self = shift();
-	if ($debug) {
-		printf("DEBUG: Job(%s): find_jobs()\n", $self);
-	}
+	if ($debug) { printf("DEBUG: Job(%s): find_jobs()\n", $self); }
 	my $job_name = shift();
 	my $query = _query() . qq{
 		where	j.job_name like '$job_name'
@@ -139,9 +107,7 @@ sub find_jobs {
 
 sub find_children {
 	my $self = shift();
-	if ($debug) {
-		printf("DEBUG: Job(%s): find_children()\n", $self);
-	}
+	if ($debug) { printf("DEBUG: Job(%s): find_children()\n", $self); }
 	my $query = _query() . qq{
 		where	j.box_joid = $self->{joid}
 		order by j.joid
@@ -161,33 +127,25 @@ sub find_children {
 
 sub next_job {
 	my $self = shift();
-	if ($debug) {
-		printf("DEBUG: Job(%s): next_job()\n", $self);
-	}
+	if ($debug) { printf("DEBUG: Job(%s): next_job()\n", $self); }
 	return $self->_fetch_next();
 }	# next_job()
 
 sub next_child {
 	my $self = shift();
-	if ($debug) {
-		printf("DEBUG: Job(%s): next_child()\n", $self);
-	}
+	if ($debug) { printf("DEBUG: Job(%s): next_child()\n", $self); }
 	return $self->_fetch_next();
 }	# next_child()
 
 sub get_status {
 	my $self = shift();
-	if ($debug) {
-		printf("DEBUG: Job(%s): get_status()\n", $self);
-	}
+	if ($debug) { printf("DEBUG: Job(%s): get_status()\n", $self); }
 	return $self->{status};
 }	# get_status()
 
 sub has_children {
 	my $self = shift();
-	if ($debug) {
-		printf("DEBUG: Job(%s): has_children()\n", $self);
-	}
+	if ($debug) { printf("DEBUG: Job(%s): has_children()\n", $self); }
 	if (!defined($self->{child_cnt}) || $self->{child_cnt} == 0) {
 		return 0;
 	}

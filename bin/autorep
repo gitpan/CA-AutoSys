@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 #
-# $Id: autorep 61 2007-10-29 17:46:55Z sini $
+# $Id: autorep 67 2008-02-11 10:49:36Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
 # Copyright (c) 2007 Sinisa Susnjar <sini@cpan.org>
@@ -192,9 +192,13 @@ sub print_job_definition {
 	printf("%*s#owner: %s\n", $level*2, "", $job->{owner});
 	printf("%*spermission: %s\n", $level*2, "", $job->{permission});
 	if ($job->{date_conditions} > 0) {
+		my @date_cond = qw(days_of_week start_times start_mins run_calendar exclude_calendar run_window);
 		printf("%*sdate_conditions: %s\n", $level*2, "", $job->{date_conditions});
-		printf("%*sdays_of_week: %s\n", $level*2, "", $job->{days_of_week});
-		printf("%*sstart_times: \"%s\"\n", $level*2, "", $job->{start_times});
+		foreach (@date_cond) {
+			if (defined($job->{$_}) && length($job->{$_}) > 0) {
+				printf("%*s$_: %s\n", $level*2, "", $job->{$_});
+			}
+		}
 	} elsif (defined($job->{condition}) && $job->{condition} ne "") {
 		printf("%*scondition: %s\n", $level*2, "", $job->{condition});
 	}

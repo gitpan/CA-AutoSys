@@ -1,5 +1,5 @@
 #
-# $Id: AutoSys.pm 57 2007-10-26 15:10:55Z sini $
+# $Id: AutoSys.pm 68 2008-02-11 10:50:27Z sini $
 #
 # CA::AutoSys - Perl Interface to CA's AutoSys job control.
 # Copyright (c) 2007 Sinisa Susnjar <sini@cpan.org>
@@ -31,7 +31,7 @@ use DBI;
 
 use vars qw($VERSION);
 
-$VERSION = '1.04';
+$VERSION = '1.05';
 
 use Exporter;
 use vars qw(@ISA @EXPORT);
